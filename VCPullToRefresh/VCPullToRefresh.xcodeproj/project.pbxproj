@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BBC90FAC1AD3C0D000AC8CE5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC90FAB1AD3C0D000AC8CE5 /* AppDelegate.swift */; };
-		BBC90FAE1AD3C0D000AC8CE5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC90FAD1AD3C0D000AC8CE5 /* ViewController.swift */; };
+		BBC90FAE1AD3C0D000AC8CE5 /* StrokeTextLoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC90FAD1AD3C0D000AC8CE5 /* StrokeTextLoadingViewController.swift */; };
 		BBC90FB11AD3C0D000AC8CE5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BBC90FAF1AD3C0D000AC8CE5 /* Main.storyboard */; };
 		BBC90FB31AD3C0D000AC8CE5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BBC90FB21AD3C0D000AC8CE5 /* Images.xcassets */; };
 		BBC90FB61AD3C0D000AC8CE5 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = BBC90FB41AD3C0D000AC8CE5 /* LaunchScreen.xib */; };
@@ -29,7 +29,7 @@
 		BBC90FA61AD3C0D000AC8CE5 /* VCPullToRefresh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VCPullToRefresh.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBC90FAA1AD3C0D000AC8CE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BBC90FAB1AD3C0D000AC8CE5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		BBC90FAD1AD3C0D000AC8CE5 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		BBC90FAD1AD3C0D000AC8CE5 /* StrokeTextLoadingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrokeTextLoadingViewController.swift; sourceTree = "<group>"; };
 		BBC90FB01AD3C0D000AC8CE5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		BBC90FB21AD3C0D000AC8CE5 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		BBC90FB51AD3C0D000AC8CE5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
@@ -78,7 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				BBC90FAB1AD3C0D000AC8CE5 /* AppDelegate.swift */,
-				BBC90FAD1AD3C0D000AC8CE5 /* ViewController.swift */,
+				BBC90FAD1AD3C0D000AC8CE5 /* StrokeTextLoadingViewController.swift */,
 				BBC90FAF1AD3C0D000AC8CE5 /* Main.storyboard */,
 				BBC90FB21AD3C0D000AC8CE5 /* Images.xcassets */,
 				BBC90FB41AD3C0D000AC8CE5 /* LaunchScreen.xib */,
@@ -212,7 +212,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BBC90FAE1AD3C0D000AC8CE5 /* ViewController.swift in Sources */,
+				BBC90FAE1AD3C0D000AC8CE5 /* StrokeTextLoadingViewController.swift in Sources */,
 				BBC90FAC1AD3C0D000AC8CE5 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -407,6 +407,7 @@
 				BBC90FC71AD3C0D000AC8CE5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		BBC90FC81AD3C0D000AC8CE5 /* Build configuration list for PBXNativeTarget "VCPullToRefreshTests" */ = {
 			isa = XCConfigurationList;
@@ -415,6 +416,7 @@
 				BBC90FCA1AD3C0D000AC8CE5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
