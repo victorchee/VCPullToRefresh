@@ -13,6 +13,9 @@
 		BBC90FB31AD3C0D000AC8CE5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BBC90FB21AD3C0D000AC8CE5 /* Images.xcassets */; };
 		BBC90FB61AD3C0D000AC8CE5 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = BBC90FB41AD3C0D000AC8CE5 /* LaunchScreen.xib */; };
 		BBC90FC21AD3C0D000AC8CE5 /* VCPullToRefreshTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC90FC11AD3C0D000AC8CE5 /* VCPullToRefreshTests.swift */; };
+		BBEC91BE1B9573FD00EBB57A /* WaterDropLoadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEC91BD1B9573FD00EBB57A /* WaterDropLoadViewController.swift */; };
+		BBEC91C01B95784800EBB57A /* UIScrollView+VCPullToRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEC91BF1B95784800EBB57A /* UIScrollView+VCPullToRefresh.swift */; };
+		BBEC91C21B957B5F00EBB57A /* UIScrollView+PullToLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEC91C11B957B5F00EBB57A /* UIScrollView+PullToLoad.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +39,9 @@
 		BBC90FBB1AD3C0D000AC8CE5 /* VCPullToRefreshTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VCPullToRefreshTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBC90FC01AD3C0D000AC8CE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BBC90FC11AD3C0D000AC8CE5 /* VCPullToRefreshTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCPullToRefreshTests.swift; sourceTree = "<group>"; };
+		BBEC91BD1B9573FD00EBB57A /* WaterDropLoadViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaterDropLoadViewController.swift; sourceTree = "<group>"; };
+		BBEC91BF1B95784800EBB57A /* UIScrollView+VCPullToRefresh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIScrollView+VCPullToRefresh.swift"; sourceTree = "<group>"; };
+		BBEC91C11B957B5F00EBB57A /* UIScrollView+PullToLoad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIScrollView+PullToLoad.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +85,9 @@
 			children = (
 				BBC90FAB1AD3C0D000AC8CE5 /* AppDelegate.swift */,
 				BBC90FAD1AD3C0D000AC8CE5 /* StrokeTextLoadingViewController.swift */,
+				BBEC91BD1B9573FD00EBB57A /* WaterDropLoadViewController.swift */,
+				BBEC91BF1B95784800EBB57A /* UIScrollView+VCPullToRefresh.swift */,
+				BBEC91C11B957B5F00EBB57A /* UIScrollView+PullToLoad.swift */,
 				BBC90FAF1AD3C0D000AC8CE5 /* Main.storyboard */,
 				BBC90FB21AD3C0D000AC8CE5 /* Images.xcassets */,
 				BBC90FB41AD3C0D000AC8CE5 /* LaunchScreen.xib */,
@@ -212,7 +221,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BBEC91C21B957B5F00EBB57A /* UIScrollView+PullToLoad.swift in Sources */,
+				BBEC91C01B95784800EBB57A /* UIScrollView+VCPullToRefresh.swift in Sources */,
 				BBC90FAE1AD3C0D000AC8CE5 /* StrokeTextLoadingViewController.swift in Sources */,
+				BBEC91BE1B9573FD00EBB57A /* WaterDropLoadViewController.swift in Sources */,
 				BBC90FAC1AD3C0D000AC8CE5 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

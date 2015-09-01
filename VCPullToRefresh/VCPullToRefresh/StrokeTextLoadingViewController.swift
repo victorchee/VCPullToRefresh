@@ -15,7 +15,7 @@ class StrokeTextLoadingViewController: UICollectionViewController {
     //! The layer that is animated as the user pulls down
     var pullToRefreshShape: CAShapeLayer!
     //! A view that contain both the pull to refresh and loading layers
-    var loadingIndicator:UIView!
+    var loadingIndicator: UIView!
     //! If new data is currently being loaded
     var isLoading: Bool = false
     
@@ -94,7 +94,7 @@ class StrokeTextLoadingViewController: UICollectionViewController {
     }
     
     //! This is the animation that is controlled using timeOffset when the user pulls down
-    func pullDownAnimation()->CAAnimation {
+    func pullDownAnimation() -> CAAnimation {
         // Text is drawn by stroking the path from 0% to 100%
         let writeText: CABasicAnimation = CABasicAnimation(keyPath: "strokeEnd")
         writeText.fromValue = NSNumber(integer: 0)
