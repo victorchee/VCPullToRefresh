@@ -66,7 +66,7 @@ class PullToRefreshView: UIView {
         super.willMoveToSuperview(newSuperview)
         if superview != nil && newSuperview == nil {
             let scrollView = self.superview as! UIScrollView
-            if scrollView.showPullToRefresh && isObserving {
+            if scrollView.enablePullToRefresh && isObserving {
                 scrollView.removeObserver(self, forKeyPath: "contentOffset")
                 scrollView.removeObserver(self, forKeyPath: "contentSize")
                 scrollView.removeObserver(self, forKeyPath: "frame")
@@ -90,6 +90,9 @@ class PullToRefreshView: UIView {
     func stopAnimating() {
         activityIndicatorView.stopAnimating()
         state = .Stopped
+        if !wasTriggeredByUser {
+            scrollView?.setContentOffset(CGPoint(x: scrollView!.contentOffset.x, y: -originalTopInset), animated: true)
+        }
     }
     
     private func resetScrollViewContentInset() {
@@ -140,7 +143,7 @@ class PullToRefreshView: UIView {
                 } else if offset.y < scrollOffsetThreshold && scrollView!.dragging && state == .Stopped {
                     state = .Triggered
                     pullingAnimation(offset)
-                } else if offset.y >= scrollOffsetThreshold && state != .Stopped {
+                } else if offset.y >= scrollOffsetThreshold && !scrollView!.dragging && state != .Stopped {
                     state = .Stopped
                 } else if (scrollView!.dragging && state == .Stopped) {
                     // pulling down
@@ -185,7 +188,7 @@ class PullToRefreshView: UIView {
             shapeLayer.path = path.CGPath
         }
         
-        if state == .Triggered {
+        if state != .Stopped {
             breakWaterDrop()
         } else {
             // before triggered
@@ -253,7 +256,7 @@ extension UIScrollView {
         }
     }
     
-    dynamic var showPullToRefresh: Bool {
+    dynamic var enablePullToRefresh: Bool {
         get {
             return !pullToRefreshView.hidden
         }
@@ -289,7 +292,7 @@ extension UIScrollView {
         view.originalTopInset = contentInset.top
         addSubview(view)
         pullToRefreshView = view
-        showPullToRefresh = true
+        enablePullToRefresh = true
     }
     
     func triggerPullToRefresh() {
