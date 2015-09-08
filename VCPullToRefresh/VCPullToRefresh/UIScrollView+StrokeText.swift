@@ -125,7 +125,6 @@ class LoadingView: UIView {
         if scrollView!.contentOffset.y == -scrollView!.contentInset.top {
             scrollView?.setContentOffset(CGPoint(x: scrollView!.contentOffset.x, y: -originalTopInset - frame.height), animated: true)
             wasTriggeredByUser = false
-//            pullingAnimation(scrollView!.contentOffset)
         } else {
             wasTriggeredByUser = true
         }
@@ -189,7 +188,6 @@ class LoadingView: UIView {
                     startAnimating()
                 } else if offset.y < scrollOffsetThreshold && scrollView!.dragging && state == .Stopped {
                     state = .Triggered
-//                    pullingAnimation(offset)
                 } else if offset.y >= scrollOffsetThreshold && !scrollView!.dragging && state != .Stopped {
                     state = .Stopped
                 } else if (scrollView!.dragging && state == .Stopped) {
