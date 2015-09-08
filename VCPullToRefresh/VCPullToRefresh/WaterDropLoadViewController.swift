@@ -31,7 +31,17 @@ class WaterDropLoadViewController: UITableViewController {
                 self.tableView.stopPullToRefresh()
             }
         }
-        self.tableView.triggerPullToRefresh()
+//        self.tableView.triggerPullToRefresh()
+        
+        self.tableView.addPullToLoadWithActionHandler { () -> Void in
+            delay(1.5) {
+                self.data.append(self.data.last! + 1)
+                self.tableView.reloadData()
+                
+                self.tableView.stopPullToLoad()
+            }
+        }
+//        self.tableView.triggerPullToLoad()
     }
 
     override func didReceiveMemoryWarning() {
