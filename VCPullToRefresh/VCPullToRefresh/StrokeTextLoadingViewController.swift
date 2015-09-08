@@ -23,7 +23,6 @@ class StrokeTextLoadingViewController: UICollectionViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         setupLoadingIndicator()
-        
         self.pullToRefreshShape.addAnimation(pullDownAnimation(), forKey: "Write 'Load' as you drag down")
     }
 

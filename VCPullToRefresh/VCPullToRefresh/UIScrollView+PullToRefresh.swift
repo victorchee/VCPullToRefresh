@@ -9,8 +9,6 @@
 
 import UIKit
 
-let PullToRefreshViewHeight: CGFloat = 60.0
-
 class PullToRefreshView: UIView {
     
     enum PullToRefreshState {
@@ -37,32 +35,27 @@ class PullToRefreshView: UIView {
             }
         }
     }
-    var waterDropLayer: CAShapeLayer!
-    var indicator: UIActivityIndicatorView!
+    var shapeLayer: CAShapeLayer!
+    var activityIndicatorView: UIActivityIndicatorView!
     var action: (() -> Void)?
     var scrollView: UIScrollView?
     var originalTopInset: CGFloat = 0.0
     var isObserving = false
     var wasTriggeredByUser = true
     
-    let waterDropTopRadius: CGFloat = 15.0
-    let waterDropBottomGap: CGFloat = 5.0
-    let waterDropTopGap: CGFloat = 5.0
-    let waterDropBottomRadius: CGFloat = 5.0
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        waterDropLayer = CAShapeLayer()
-        waterDropLayer.fillColor = UIColor(red: 93.0/255.0, green: 162.0/255.0, blue: 0.0, alpha: 1.0).CGColor
-        waterDropLayer.strokeColor = UIColor.clearColor().CGColor
-        waterDropLayer.lineWidth = 0.5
-        layer.addSublayer(waterDropLayer)
+        shapeLayer = CAShapeLayer()
+        shapeLayer.fillColor = UIColor.orangeColor().CGColor
+        shapeLayer.strokeColor = UIColor.clearColor().CGColor
+        shapeLayer.lineWidth = 0.5
+        layer.addSublayer(shapeLayer)
         
-        indicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.White);
-        indicator.center = CGPoint(x: frame.width/2.0, y: frame.height/2.0)
-        indicator.hidesWhenStopped = true
-        self.addSubview(indicator)
+        activityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.White);
+        activityIndicatorView.center = CGPoint(x: frame.width/2.0, y: frame.height/2.0)
+        activityIndicatorView.hidesWhenStopped = true
+        self.addSubview(activityIndicatorView)
     }
    
     required init(coder aDecoder: NSCoder) {
@@ -86,27 +79,17 @@ class PullToRefreshView: UIView {
         if scrollView!.contentOffset.y == -scrollView!.contentInset.top {
             scrollView?.setContentOffset(CGPoint(x: scrollView!.contentOffset.x, y: -originalTopInset - frame.height), animated: true)
             wasTriggeredByUser = false
-            breakWaterDrop()
+            pullingAnimation(scrollView!.contentOffset)
         } else {
             wasTriggeredByUser = true
         }
         state = .Loading
-        indicator.startAnimating()
+        activityIndicatorView.startAnimating()
     }
     
     func stopAnimating() {
-        indicator.stopAnimating()
-        if !wasTriggeredByUser {
-            scrollView?.setContentOffset(CGPoint(x: scrollView!.contentOffset.x, y: -originalTopInset), animated: true)
-        }
+        activityIndicatorView.stopAnimating()
         state = .Stopped
-    }
-    
-    /**
-        线性插值
-    */
-    private func lerp(a: CGFloat, _ b: CGFloat, _ p: CGFloat) -> CGFloat {
-        return a + (b - a) * p
     }
     
     private func resetScrollViewContentInset() {
@@ -139,7 +122,7 @@ class PullToRefreshView: UIView {
         if keyPath == "contentOffset" {
             scrollViewDidScroll(change[NSKeyValueChangeNewKey]?.CGPointValue())
         } else if keyPath == "contentSize" {
-            frame = CGRect(x: 0.0, y: -PullToRefreshViewHeight, width: scrollView?.frame.width ?? 0, height: PullToRefreshViewHeight)
+            frame = CGRect(x: 0.0, y: -frame.height, width: scrollView?.frame.width ?? 0, height: frame.height)
             layoutSubviews()
         } else if keyPath == "frame" {
             layoutSubviews()
@@ -156,99 +139,116 @@ class PullToRefreshView: UIView {
                     startAnimating()
                 } else if offset.y < scrollOffsetThreshold && scrollView!.dragging && state == .Stopped {
                     state = .Triggered
+                    pullingAnimation(offset)
                 } else if offset.y >= scrollOffsetThreshold && state != .Stopped {
                     state = .Stopped
-                } else if (scrollView!.dragging) {
+                } else if (scrollView!.dragging && state == .Stopped) {
                     // pulling down
-                    if offset.y + originalTopInset > -(waterDropTopRadius * 2 + waterDropBottomGap + waterDropTopGap) {
-                        // pulling before the whole balloon is shown
-                        let center = CGPoint(x: bounds.width/2.0, y: bounds.height - waterDropBottomGap - waterDropTopRadius)
-                        
-                        indicator.center = center
-                        
-                        let path = UIBezierPath(arcCenter: center, radius: waterDropTopRadius, startAngle: 0.0, endAngle: CGFloat(2.0 * M_PI), clockwise: true)
-                        waterDropLayer.path = path.CGPath
-                    } else {
-                        // pulling after the whole balloon is shown
-                        let topY = bounds.height + offset.y + originalTopInset // top base line
-                        if topY >= 0 {
-                            // after the whole balloon is shown, stretch it
-                            var bottomRadius = waterDropTopRadius * (topY / (bounds.height - (waterDropTopRadius * 2 + waterDropBottomGap + waterDropTopGap)))
-                            bottomRadius = max(bottomRadius, waterDropBottomRadius)
-                            
-                            let path = UIBezierPath()
-                            let topArcCenter = CGPoint(x: bounds.width/2.0, y: topY + waterDropTopGap + waterDropTopRadius)
-                            
-                            indicator.center = topArcCenter
-                            
-                            path.addArcWithCenter(topArcCenter, radius: waterDropTopRadius, startAngle: 0, endAngle: CGFloat(M_PI), clockwise: false)
-                            
-                            let bottomArcCenter = CGPoint(x: bounds.width/2.0, y: bounds.height - waterDropBottomGap - bottomRadius)
-                            
-                            let leftTopControlPoint = CGPoint(x: lerp(topArcCenter.x - waterDropTopRadius, bottomArcCenter.x - bottomRadius, 0.1), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
-                            let leftBottomControlPoint = CGPoint(x: lerp(topArcCenter.x - waterDropTopRadius, bottomArcCenter.x - bottomRadius, 0.9), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
-                            path.addCurveToPoint(CGPoint(x: bottomArcCenter.x - bottomRadius, y: bottomArcCenter.y), controlPoint1: leftTopControlPoint, controlPoint2: leftBottomControlPoint)
-                            
-                            path.addArcWithCenter(bottomArcCenter, radius: bottomRadius, startAngle: CGFloat(M_PI), endAngle: 0.0, clockwise: false)
-                            
-                            let rightTopControlPoint = CGPoint(x: lerp(topArcCenter.x + waterDropTopRadius, bottomArcCenter.x + bottomRadius, 0.1), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
-                            let rightBottomControlPoint = CGPoint(x: lerp(topArcCenter.x + waterDropTopRadius, bottomArcCenter.x + bottomRadius, 0.9), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
-                            path.addCurveToPoint(CGPoint(x: topArcCenter.x + waterDropTopRadius, y: topArcCenter.y), controlPoint1: rightBottomControlPoint, controlPoint2: rightTopControlPoint)
-                            
-                            path.closePath()
-                            waterDropLayer.path = path.CGPath
-                        } else {
-                            // when top base line out of edge, break the balloon
-                            breakWaterDrop()
-                        }
-                    }
+                    pullingAnimation(offset)
                 }
-            } else {
-                // loading
-                var offset = max(scrollView!.contentOffset.y * -1, 0.0)
-                offset = min(offset, originalTopInset + frame.height)
-                let inset = scrollView!.contentInset
-                scrollView?.contentInset = UIEdgeInsets(top: offset, left: inset.left, bottom: inset.bottom, right: inset.right)
             }
         }
     }
     
-    private func breakWaterDrop() {
-        let path = UIBezierPath()
-        let topArcCenter = CGPoint(x: frame.width/2.0, y: waterDropTopGap + waterDropTopRadius)
+    private func pullingAnimation(offset: CGPoint) {
+        let waterDropTopRadius: CGFloat = 15.0
+        let waterDropBottomGap: CGFloat = 5.0
+        let waterDropTopGap: CGFloat = 5.0
+        let waterDropBottomRadius: CGFloat = 5.0
         
-        indicator.center = topArcCenter
+        /**
+        线性插值
+        */
+        func lerp(a: CGFloat, b: CGFloat, p: CGFloat) -> CGFloat {
+            return a + (b - a) * p
+        }
         
-        path.addArcWithCenter(topArcCenter, radius: waterDropTopRadius, startAngle: 0.0, endAngle: CGFloat(M_PI), clockwise: false)
+        func breakWaterDrop() {
+            let path = UIBezierPath()
+            let topArcCenter = CGPoint(x: frame.width/2.0, y: waterDropTopGap + waterDropTopRadius)
+            
+            activityIndicatorView.center = topArcCenter
+            
+            path.addArcWithCenter(topArcCenter, radius: waterDropTopRadius, startAngle: 0.0, endAngle: CGFloat(M_PI), clockwise: false)
+            
+            let bottomArcCenter = CGPoint(x: frame.width/2.0, y: frame.height - waterDropBottomGap - waterDropBottomRadius)
+            let breakPoint = CGPoint(x: bottomArcCenter.x, y: bottomArcCenter.y - waterDropBottomRadius - 3.0)
+            let leftControlPoint = CGPoint(x: topArcCenter.x - waterDropTopRadius, y: lerp(topArcCenter.y, breakPoint.y, 0.4))
+            path.addQuadCurveToPoint(breakPoint, controlPoint: leftControlPoint)
+            
+            let rightControlPoint = CGPoint(x: topArcCenter.x + waterDropTopRadius, y: lerp(topArcCenter.y, breakPoint.y, 0.4))
+            path.addQuadCurveToPoint(CGPoint(x: topArcCenter.x + waterDropTopRadius, y: topArcCenter.y), controlPoint: rightControlPoint)
+            
+            path.moveToPoint(bottomArcCenter)
+            path.addArcWithCenter(bottomArcCenter, radius: waterDropBottomRadius, startAngle: 0.0, endAngle: CGFloat(2.0 * M_PI), clockwise: true)
+            
+            shapeLayer.path = path.CGPath
+        }
         
-        let bottomArcCenter = CGPoint(x: frame.width/2.0, y: frame.height - waterDropBottomGap - waterDropBottomRadius)
-        let breakPoint = CGPoint(x: bottomArcCenter.x, y: bottomArcCenter.y - waterDropBottomRadius - 3.0)
-        let leftControlPoint = CGPoint(x: topArcCenter.x - waterDropTopRadius, y: lerp(topArcCenter.y, breakPoint.y, 0.4))
-        path.addQuadCurveToPoint(breakPoint, controlPoint: leftControlPoint)
-        
-        let rightControlPoint = CGPoint(x: topArcCenter.x + waterDropTopRadius, y: lerp(topArcCenter.y, breakPoint.y, 0.4))
-        path.addQuadCurveToPoint(CGPoint(x: topArcCenter.x + waterDropTopRadius, y: topArcCenter.y), controlPoint: rightControlPoint)
-        
-        path.moveToPoint(bottomArcCenter)
-        path.addArcWithCenter(bottomArcCenter, radius: waterDropBottomRadius, startAngle: 0.0, endAngle: CGFloat(2.0 * M_PI), clockwise: true)
-        
-        waterDropLayer.path = path.CGPath
+        if state == .Triggered {
+            breakWaterDrop()
+        } else {
+            // before triggered
+            
+            if offset.y + originalTopInset > -(waterDropTopRadius * 2 + waterDropBottomGap + waterDropTopGap) {
+                // pulling before the whole balloon is shown
+                let center = CGPoint(x: bounds.width/2.0, y: bounds.height - waterDropBottomGap - waterDropTopRadius)
+                
+                activityIndicatorView.center = center
+                
+                let path = UIBezierPath(arcCenter: center, radius: waterDropTopRadius, startAngle: 0.0, endAngle: CGFloat(2.0 * M_PI), clockwise: true)
+                shapeLayer.path = path.CGPath
+            } else {
+                // pulling after the whole balloon is shown
+                let topY = bounds.height + offset.y + originalTopInset // top base line
+                if topY > 0 {
+                    // after the whole balloon is shown, stretch it
+                    var bottomRadius = waterDropTopRadius * (topY / (bounds.height - (waterDropTopRadius * 2 + waterDropBottomGap + waterDropTopGap)))
+                    bottomRadius = max(bottomRadius, waterDropBottomRadius)
+                    
+                    let path = UIBezierPath()
+                    let topArcCenter = CGPoint(x: bounds.width/2.0, y: topY + waterDropTopGap + waterDropTopRadius)
+                    
+                    activityIndicatorView.center = topArcCenter
+                    
+                    path.addArcWithCenter(topArcCenter, radius: waterDropTopRadius, startAngle: 0, endAngle: CGFloat(M_PI), clockwise: false)
+                    
+                    let bottomArcCenter = CGPoint(x: bounds.width/2.0, y: bounds.height - waterDropBottomGap - bottomRadius)
+                    
+                    let leftTopControlPoint = CGPoint(x: lerp(topArcCenter.x - waterDropTopRadius, bottomArcCenter.x - bottomRadius, 0.1), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
+                    let leftBottomControlPoint = CGPoint(x: lerp(topArcCenter.x - waterDropTopRadius, bottomArcCenter.x - bottomRadius, 0.9), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
+                    path.addCurveToPoint(CGPoint(x: bottomArcCenter.x - bottomRadius, y: bottomArcCenter.y), controlPoint1: leftTopControlPoint, controlPoint2: leftBottomControlPoint)
+                    
+                    path.addArcWithCenter(bottomArcCenter, radius: bottomRadius, startAngle: CGFloat(M_PI), endAngle: 0.0, clockwise: false)
+                    
+                    let rightTopControlPoint = CGPoint(x: lerp(topArcCenter.x + waterDropTopRadius, bottomArcCenter.x + bottomRadius, 0.1), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
+                    let rightBottomControlPoint = CGPoint(x: lerp(topArcCenter.x + waterDropTopRadius, bottomArcCenter.x + bottomRadius, 0.9), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
+                    path.addCurveToPoint(CGPoint(x: topArcCenter.x + waterDropTopRadius, y: topArcCenter.y), controlPoint1: rightBottomControlPoint, controlPoint2: rightTopControlPoint)
+                    
+                    path.closePath()
+                    shapeLayer.path = path.CGPath
+                } else {
+                    // when top base line out of edge, it's already triggered
+                }
+            }
+        }
     }
 }
 
 extension UIScrollView {
-    private struct AssociatedKeys {
-        static var DescriptiveName = "PullToRefresh"
+    private struct Constant {
+        static var AssociatedKey = "PullToRefresh"
+        static let PullToRefreshViewHeight: CGFloat = 60.0
     }
     
     dynamic var pullToRefreshView: PullToRefreshView {
         get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.DescriptiveName) as! PullToRefreshView
+            return objc_getAssociatedObject(self, &Constant.AssociatedKey) as! PullToRefreshView
         }
         
         set {
             willChangeValueForKey("pullToRefreshView")
-            objc_setAssociatedObject(self, &AssociatedKeys.DescriptiveName, newValue, objc_AssociationPolicy(OBJC_ASSOCIATION_ASSIGN));
+            objc_setAssociatedObject(self, &Constant.AssociatedKey, newValue, objc_AssociationPolicy(OBJC_ASSOCIATION_ASSIGN));
             didChangeValueForKey("pullToRefreshView")
         }
     }
@@ -267,7 +267,7 @@ extension UIScrollView {
                     addObserver(pullToRefreshView, forKeyPath: "contentSize", options: NSKeyValueObservingOptions.New, context: nil)
                     addObserver(pullToRefreshView, forKeyPath: "frame", options: NSKeyValueObservingOptions.New, context: nil)
                     pullToRefreshView.isObserving = true
-                    pullToRefreshView.frame = CGRect(x: 0.0, y: -PullToRefreshViewHeight, width: frame.width, height: PullToRefreshViewHeight)
+                    pullToRefreshView.frame = CGRect(x: 0.0, y: -Constant.PullToRefreshViewHeight, width: frame.width, height: Constant.PullToRefreshViewHeight)
                 }
             } else {
                 if pullToRefreshView.isObserving {
@@ -282,17 +282,14 @@ extension UIScrollView {
     }
         
     func addPullToRefreshWithActionHandler(actionHandler: () -> Void) {
-//        if pullToRefreshView == nil {
-            let view = PullToRefreshView(frame: CGRect(x: 0.0, y: -PullToRefreshViewHeight, width: frame.width, height: PullToRefreshViewHeight))
-            view.clipsToBounds = true
-            view.backgroundColor = UIColor.orangeColor()
-            view.action = actionHandler
-            view.scrollView = self
-            view.originalTopInset = contentInset.top
-            addSubview(view)
-            pullToRefreshView = view
-            showPullToRefresh = true
-//        }
+        let view = PullToRefreshView(frame: CGRect(x: 0.0, y: -Constant.PullToRefreshViewHeight, width: frame.width, height: Constant.PullToRefreshViewHeight))
+        view.clipsToBounds = true
+        view.action = actionHandler
+        view.scrollView = self
+        view.originalTopInset = contentInset.top
+        addSubview(view)
+        pullToRefreshView = view
+        showPullToRefresh = true
     }
     
     func triggerPullToRefresh() {
