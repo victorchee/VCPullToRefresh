@@ -19,8 +19,8 @@ class PullToRefreshView: UIView {
     
     var state: PullToRefreshState = .Stopped {
         didSet {
-            setNeedsLayout()
-            layoutIfNeeded()
+//            setNeedsLayout()
+//            layoutIfNeeded()
             
             switch self.state {
             case .Stopped:
@@ -42,7 +42,7 @@ class PullToRefreshView: UIView {
     var originalTopInset: CGFloat = 0.0
     var isObserving = false
     var wasTriggeredByUser = true
-    
+        
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -77,6 +77,11 @@ class PullToRefreshView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        frame = CGRect(x: 0.0, y: -frame.height, width: scrollView?.frame.width ?? frame.width, height: frame.height)
+        if !scrollView!.dragging && state == .Loading {
+            // 这里只解决了Loading的时候旋转的问题，dragging的过程中旋转依旧有问题
+            originalTopInset = scrollView!.contentInset.top - frame.height
+        }
         activityIndicatorView.center = CGPoint(x: frame.width/2.0, y: frame.height/2.0)
         pullingAnimation(scrollView!.contentOffset)
     }
@@ -131,7 +136,6 @@ class PullToRefreshView: UIView {
         if keyPath == "contentOffset" {
             scrollViewDidScroll(change[NSKeyValueChangeNewKey]?.CGPointValue())
         } else if keyPath == "contentSize" {
-            frame = CGRect(x: 0.0, y: -frame.height, width: scrollView?.frame.width ?? 0, height: frame.height)
             layoutSubviews()
         } else if keyPath == "frame" {
             layoutSubviews()
@@ -300,8 +304,6 @@ extension UIScrollView {
         addSubview(view)
         pullToRefreshView = view
         enablePullToRefresh = true
-        
-        registerNotifications()
     }
     
     func triggerPullToRefresh() {
@@ -315,21 +317,6 @@ extension UIScrollView {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.pullToRefreshView.state = .Stopped
             self.pullToRefreshView.stopAnimating()
-            self.unregisterNotifications()
         })
-    }
-
-    // MARK - Notification
-    private func registerNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "statusBarOrientationDidChange:", name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
-    }
-    
-    private func unregisterNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
-    }
-    
-    func statusBarOrientationDidChange(notification: NSNotification) {
-        pullToRefreshView.frame = CGRect(x: 0.0, y: -Constant.PullToRefreshViewHeight, width: frame.width, height: Constant.PullToRefreshViewHeight)
-        pullToRefreshView.originalTopInset = contentInset.top - Constant.PullToRefreshViewHeight
     }
 }

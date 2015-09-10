@@ -194,8 +194,6 @@ extension UIScrollView {
         addSubview(view)
         pullToLoadView = view
         enablePullToLoad = true
-        
-        registerNotifications()
     }
     
     func triggerPullToLoad() {
@@ -209,21 +207,6 @@ extension UIScrollView {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.pullToLoadView.state = .Stopped
             self.pullToLoadView.stopAnimating()
-            self.unregisterNotifications()
         })
     }
-    
-    // MARK - Notification
-    private func registerNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "statusBarOrientationDidChange:", name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
-    }
-    
-    private func unregisterNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
-    }
-    
-    func statusBarOrientationDidChange(notification: NSNotification) {
-        pullToLoadView.frame = CGRect(x: 0.0, y: -Constant.PullToLoadViewHeight, width: frame.width, height: Constant.PullToLoadViewHeight)
-    }
-    
 }

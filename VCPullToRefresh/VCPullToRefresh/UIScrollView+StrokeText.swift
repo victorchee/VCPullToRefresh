@@ -286,8 +286,6 @@ extension UIScrollView {
         addSubview(view)
         loadingView = view
         enableLoading = true
-        
-        registerNotifications()
     }
     
     func triggerLoading() {
@@ -301,21 +299,6 @@ extension UIScrollView {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.loadingView.state = .Stopped
             self.loadingView.stopAnimating()
-            self.unregisterNotifications()
         })
-    }
-    
-    // MARK - Notification
-    private func registerNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "statusBarOrientationDidChange:", name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
-    }
-    
-    private func unregisterNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
-    }
-    
-    func statusBarOrientationDidChange(notification: NSNotification) {
-        loadingView.frame = CGRect(x: 0.0, y: -Constant.LoadingViewHeight, width: frame.width, height: Constant.LoadingViewHeight)
-        loadingView.originalTopInset = contentInset.top - Constant.LoadingViewHeight
     }
 }
