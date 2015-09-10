@@ -81,6 +81,11 @@ class LoadingView: UIView {
         }
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        activityIndicatorView.center = CGPoint(x: frame.width/2.0, y: frame.height/2.0)
+    }
+    
     private func loadPathWithText(#text: String)->(path: CGPath!, suggestSize: CGSize) {
         let letters: CGMutablePathRef = CGPathCreateMutable()
         let font: CTFontRef = CTFontCreateWithName("Helvetica-Bold", 50, nil)
@@ -281,6 +286,8 @@ extension UIScrollView {
         addSubview(view)
         loadingView = view
         enableLoading = true
+        
+        registerNotifications()
     }
     
     func triggerLoading() {
@@ -294,7 +301,21 @@ extension UIScrollView {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.loadingView.state = .Stopped
             self.loadingView.stopAnimating()
+            self.unregisterNotifications()
         })
     }
     
+    // MARK - Notification
+    private func registerNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "statusBarOrientationDidChange:", name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
+    }
+    
+    private func unregisterNotifications() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
+    }
+    
+    func statusBarOrientationDidChange(notification: NSNotification) {
+        loadingView.frame = CGRect(x: 0.0, y: -Constant.LoadingViewHeight, width: frame.width, height: Constant.LoadingViewHeight)
+        loadingView.originalTopInset = contentInset.top - Constant.LoadingViewHeight
+    }
 }

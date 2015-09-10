@@ -75,6 +75,12 @@ class PullToRefreshView: UIView {
         }
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        activityIndicatorView.center = CGPoint(x: frame.width/2.0, y: frame.height/2.0)
+        pullingAnimation(scrollView!.contentOffset)
+    }
+    
     func startAnimating() {
         if scrollView!.contentOffset.y == -scrollView!.contentInset.top {
             scrollView?.setContentOffset(CGPoint(x: scrollView!.contentOffset.x, y: -originalTopInset - frame.height), animated: true)
@@ -287,12 +293,15 @@ extension UIScrollView {
     func addPullToRefreshWithActionHandler(actionHandler: () -> Void) {
         let view = PullToRefreshView(frame: CGRect(x: 0.0, y: -Constant.PullToRefreshViewHeight, width: frame.width, height: Constant.PullToRefreshViewHeight))
         view.clipsToBounds = true
+        view.backgroundColor = UIColor.purpleColor()
         view.action = actionHandler
         view.scrollView = self
         view.originalTopInset = contentInset.top
         addSubview(view)
         pullToRefreshView = view
         enablePullToRefresh = true
+        
+        registerNotifications()
     }
     
     func triggerPullToRefresh() {
@@ -306,7 +315,21 @@ extension UIScrollView {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.pullToRefreshView.state = .Stopped
             self.pullToRefreshView.stopAnimating()
+            self.unregisterNotifications()
         })
     }
 
+    // MARK - Notification
+    private func registerNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "statusBarOrientationDidChange:", name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
+    }
+    
+    private func unregisterNotifications() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationDidChangeStatusBarOrientationNotification, object: nil)
+    }
+    
+    func statusBarOrientationDidChange(notification: NSNotification) {
+        pullToRefreshView.frame = CGRect(x: 0.0, y: -Constant.PullToRefreshViewHeight, width: frame.width, height: Constant.PullToRefreshViewHeight)
+        pullToRefreshView.originalTopInset = contentInset.top - Constant.PullToRefreshViewHeight
+    }
 }

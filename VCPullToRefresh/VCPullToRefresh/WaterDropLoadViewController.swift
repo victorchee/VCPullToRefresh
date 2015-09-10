@@ -24,7 +24,7 @@ class WaterDropLoadViewController: UITableViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         self.tableView.addPullToRefreshWithActionHandler { () -> Void in
-            delay(1.5) {
+            delay(10.5) {
                 self.data.insert(self.data.first! - 1, atIndex: 0)
                 self.tableView.reloadData()
                 
@@ -33,14 +33,14 @@ class WaterDropLoadViewController: UITableViewController {
         }
 //        self.tableView.triggerPullToRefresh()
         
-        self.tableView.addPullToLoadWithActionHandler { () -> Void in
-            delay(1.5) {
-                self.data.append(self.data.last! + 1)
-                self.tableView.reloadData()
-                
-                self.tableView.stopPullToLoad()
-            }
-        }
+//        self.tableView.addPullToLoadWithActionHandler { () -> Void in
+//            delay(1.5) {
+//                self.data.append(self.data.last! + 1)
+//                self.tableView.reloadData()
+//                
+//                self.tableView.stopPullToLoad()
+//            }
+//        }
 //        self.tableView.triggerPullToLoad()
     }
 
