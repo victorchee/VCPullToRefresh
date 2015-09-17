@@ -51,7 +51,9 @@ class LoadingView: UIView {
         shapeLayer.lineCap = kCALineCapRound
         shapeLayer.lineJoin = kCALineJoinRound
         var suggestSize: CGSize
-        (shapeLayer.path, suggestSize) = loadPathWithText(text: "VC")
+        var path: CGPath
+        (path: path, suggestSize: suggestSize) = loadPathWithText(text: "VC")
+        shapeLayer.path = path
         shapeLayer.position = CGPoint(x: (frame.width - suggestSize.width)/2.0, y: (frame.height - suggestSize.height)/2.0)
         shapeLayer.strokeEnd = 0.0
         shapeLayer.speed = 0.0 // pause
@@ -64,7 +66,7 @@ class LoadingView: UIView {
         self.addSubview(activityIndicatorView)
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
@@ -86,10 +88,11 @@ class LoadingView: UIView {
         activityIndicatorView.center = CGPoint(x: frame.width/2.0, y: frame.height/2.0)
     }
     
-    private func loadPathWithText(#text: String)->(path: CGPath!, suggestSize: CGSize) {
+    private func loadPathWithText(text text: String)->(path: CGPath, suggestSize: CGSize) {
         let letters: CGMutablePathRef = CGPathCreateMutable()
-        let font: CTFontRef = CTFontCreateWithName("Helvetica-Bold", 50, nil)
-        let attributedString = NSAttributedString(string: text, attributes: [kCTFontAttributeName: font])
+        let font = UIFont(name: "Helvetica-Bold", size: 50)!
+        let attributes = [kCTFontAttributeName as String : font]
+        let attributedString = NSAttributedString(string: text, attributes: attributes)
         
         // 字体的Size
         let framesetter: CTFramesetterRef = CTFramesetterCreateWithAttributedString(attributedString)
@@ -112,7 +115,7 @@ class LoadingView: UIView {
                 CTRunGetPositions(run, thisGlyphRange, &position)
                 
                 // Get PATH of outline
-                let letter: CGPathRef = CTFontCreatePathForGlyph(runFont, glyph, nil)
+                let letter: CGPathRef = CTFontCreatePathForGlyph(runFont, glyph, nil)!
                 // 坐标系转换
                 var transform: CGAffineTransform = CGAffineTransformMake(1, 0, 0, -1, position.x, scrollView?.frame.height ?? 60.0 + position.y)
                 CGPathAddPath(letters, &transform, letter)
@@ -162,7 +165,7 @@ class LoadingView: UIView {
     }
     
     private func setScrollViewContentInset(insert: UIEdgeInsets) {
-        UIView.animateWithDuration(0.75, delay: 0, options: UIViewAnimationOptions.AllowUserInteraction | .BeginFromCurrentState, animations: { () -> Void in
+        UIView.animateWithDuration(0.75, delay: 0, options: [UIViewAnimationOptions.AllowUserInteraction, .BeginFromCurrentState], animations: { () -> Void in
             self.scrollView?.contentInset = insert
             if self.state == .Stopped {
                 // finish animation
@@ -172,9 +175,11 @@ class LoadingView: UIView {
         }
     }
     
-    override func observeValueForKeyPath(keyPath: String, ofObject object: AnyObject, change: [NSObject : AnyObject], context: UnsafeMutablePointer<Void>) {
+    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         if keyPath == "contentOffset" {
-            scrollViewDidScroll(change[NSKeyValueChangeNewKey]?.CGPointValue())
+            if let c = change {
+                scrollViewDidScroll(c[NSKeyValueChangeNewKey]?.CGPointValue)
+            }
         } else if keyPath == "contentSize" {
             frame = CGRect(x: 0.0, y: -frame.height, width: scrollView?.frame.width ?? 0, height: frame.height)
             layoutSubviews()
@@ -244,7 +249,7 @@ extension UIScrollView {
         
         set {
             willChangeValueForKey("loadingView")
-            objc_setAssociatedObject(self, &Constant.AssociatedKey, newValue, objc_AssociationPolicy(OBJC_ASSOCIATION_ASSIGN));
+            objc_setAssociatedObject(self, &Constant.AssociatedKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_ASSIGN);
             didChangeValueForKey("loadingView")
         }
     }

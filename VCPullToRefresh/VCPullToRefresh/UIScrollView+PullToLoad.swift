@@ -51,7 +51,7 @@ class PullToLoadView: UIView {
         self.addSubview(activityIndicatorView)
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
@@ -103,7 +103,7 @@ class PullToLoadView: UIView {
     }
     
     private func setScrollViewContentInset(insert: UIEdgeInsets) {
-        UIView.animateWithDuration(0.75, delay: 0, options: UIViewAnimationOptions.AllowUserInteraction | .BeginFromCurrentState, animations: { () -> Void in
+        UIView.animateWithDuration(0.75, delay: 0, options: [UIViewAnimationOptions.AllowUserInteraction, .BeginFromCurrentState], animations: { () -> Void in
             self.scrollView?.contentInset = insert
             if self.state == .Stopped {
                 // finish animation
@@ -113,9 +113,11 @@ class PullToLoadView: UIView {
         }
     }
     
-    override func observeValueForKeyPath(keyPath: String, ofObject object: AnyObject, change: [NSObject : AnyObject], context: UnsafeMutablePointer<Void>) {
+    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         if keyPath == "contentOffset" {
-            scrollViewDidScroll(change[NSKeyValueChangeNewKey]?.CGPointValue())
+            if let c = change {
+                scrollViewDidScroll(c[NSKeyValueChangeNewKey]?.CGPointValue)
+            }
         } else if keyPath == "contentSize" {
             frame = CGRect(x: 0.0, y: scrollView!.contentSize.height, width: scrollView?.frame.width ?? 0, height: frame.height)
             layoutSubviews()
@@ -154,7 +156,7 @@ extension UIScrollView {
         
         set {
             willChangeValueForKey("pullToLoadView")
-            objc_setAssociatedObject(self, &Constant.AssociatedKey, newValue, objc_AssociationPolicy(OBJC_ASSOCIATION_ASSIGN));
+            objc_setAssociatedObject(self, &Constant.AssociatedKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_ASSIGN);
             didChangeValueForKey("pullToLoadView")
         }
     }

@@ -58,7 +58,7 @@ class PullToRefreshView: UIView {
         self.addSubview(activityIndicatorView)
     }
    
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
@@ -122,7 +122,7 @@ class PullToRefreshView: UIView {
     }
     
     private func setScrollViewContentInset(insert: UIEdgeInsets) {
-        UIView.animateWithDuration(0.75, delay: 0, options: UIViewAnimationOptions.AllowUserInteraction | .BeginFromCurrentState, animations: { () -> Void in
+        UIView.animateWithDuration(0.75, delay: 0, options: [UIViewAnimationOptions.AllowUserInteraction, .BeginFromCurrentState], animations: { () -> Void in
             self.scrollView?.contentInset = insert
             if self.state == .Stopped {
                // finish animation
@@ -132,9 +132,11 @@ class PullToRefreshView: UIView {
         }
     }
     
-    override func observeValueForKeyPath(keyPath: String, ofObject object: AnyObject, change: [NSObject : AnyObject], context: UnsafeMutablePointer<Void>) {
+    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         if keyPath == "contentOffset" {
-            scrollViewDidScroll(change[NSKeyValueChangeNewKey]?.CGPointValue())
+            if let c = change {
+                scrollViewDidScroll(c[NSKeyValueChangeNewKey]?.CGPointValue)
+            }
         } else if keyPath == "contentSize" {
             layoutSubviews()
         } else if keyPath == "frame" {
@@ -186,10 +188,10 @@ class PullToRefreshView: UIView {
             
             let bottomArcCenter = CGPoint(x: frame.width/2.0, y: frame.height - waterDropBottomGap - waterDropBottomRadius)
             let breakPoint = CGPoint(x: bottomArcCenter.x, y: bottomArcCenter.y - waterDropBottomRadius - 3.0)
-            let leftControlPoint = CGPoint(x: topArcCenter.x - waterDropTopRadius, y: lerp(topArcCenter.y, breakPoint.y, 0.4))
+            let leftControlPoint = CGPoint(x: topArcCenter.x - waterDropTopRadius, y: lerp(topArcCenter.y, b: breakPoint.y, p: 0.4))
             path.addQuadCurveToPoint(breakPoint, controlPoint: leftControlPoint)
             
-            let rightControlPoint = CGPoint(x: topArcCenter.x + waterDropTopRadius, y: lerp(topArcCenter.y, breakPoint.y, 0.4))
+            let rightControlPoint = CGPoint(x: topArcCenter.x + waterDropTopRadius, y: lerp(topArcCenter.y, b: breakPoint.y, p: 0.4))
             path.addQuadCurveToPoint(CGPoint(x: topArcCenter.x + waterDropTopRadius, y: topArcCenter.y), controlPoint: rightControlPoint)
             
             path.moveToPoint(bottomArcCenter)
@@ -228,14 +230,14 @@ class PullToRefreshView: UIView {
                     
                     let bottomArcCenter = CGPoint(x: bounds.width/2.0, y: bounds.height - waterDropBottomGap - bottomRadius)
                     
-                    let leftTopControlPoint = CGPoint(x: lerp(topArcCenter.x - waterDropTopRadius, bottomArcCenter.x - bottomRadius, 0.1), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
-                    let leftBottomControlPoint = CGPoint(x: lerp(topArcCenter.x - waterDropTopRadius, bottomArcCenter.x - bottomRadius, 0.9), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
+                    let leftTopControlPoint = CGPoint(x: lerp(topArcCenter.x - waterDropTopRadius, b: bottomArcCenter.x - bottomRadius, p: 0.1), y: lerp(topArcCenter.y, b: bottomArcCenter.y, p: 0.5))
+                    let leftBottomControlPoint = CGPoint(x: lerp(topArcCenter.x - waterDropTopRadius, b: bottomArcCenter.x - bottomRadius, p: 0.9), y: lerp(topArcCenter.y, b: bottomArcCenter.y, p: 0.5))
                     path.addCurveToPoint(CGPoint(x: bottomArcCenter.x - bottomRadius, y: bottomArcCenter.y), controlPoint1: leftTopControlPoint, controlPoint2: leftBottomControlPoint)
                     
                     path.addArcWithCenter(bottomArcCenter, radius: bottomRadius, startAngle: CGFloat(M_PI), endAngle: 0.0, clockwise: false)
                     
-                    let rightTopControlPoint = CGPoint(x: lerp(topArcCenter.x + waterDropTopRadius, bottomArcCenter.x + bottomRadius, 0.1), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
-                    let rightBottomControlPoint = CGPoint(x: lerp(topArcCenter.x + waterDropTopRadius, bottomArcCenter.x + bottomRadius, 0.9), y: lerp(topArcCenter.y, bottomArcCenter.y, 0.5))
+                    let rightTopControlPoint = CGPoint(x: lerp(topArcCenter.x + waterDropTopRadius, b: bottomArcCenter.x + bottomRadius, p: 0.1), y: lerp(topArcCenter.y, b: bottomArcCenter.y, p: 0.5))
+                    let rightBottomControlPoint = CGPoint(x: lerp(topArcCenter.x + waterDropTopRadius, b: bottomArcCenter.x + bottomRadius, p: 0.9), y: lerp(topArcCenter.y, b: bottomArcCenter.y, p: 0.5))
                     path.addCurveToPoint(CGPoint(x: topArcCenter.x + waterDropTopRadius, y: topArcCenter.y), controlPoint1: rightBottomControlPoint, controlPoint2: rightTopControlPoint)
                     
                     path.closePath()
@@ -261,7 +263,7 @@ extension UIScrollView {
         
         set {
             willChangeValueForKey("pullToRefreshView")
-            objc_setAssociatedObject(self, &Constant.AssociatedKey, newValue, objc_AssociationPolicy(OBJC_ASSOCIATION_ASSIGN));
+            objc_setAssociatedObject(self, &Constant.AssociatedKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_ASSIGN);
             didChangeValueForKey("pullToRefreshView")
         }
     }
